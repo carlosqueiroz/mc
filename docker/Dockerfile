@@ -78,17 +78,19 @@ RUN mkdir -p $ITK_DIR/src $ITK_DIR/build && \
     cd $ITK_DIR/src && \
     git clone --branch $ITK_VERSION https://github.com/InsightSoftwareConsortium/ITK.git --depth 1 . && \
     cd $ITK_DIR/build && \
-    cmake -DCMAKE_CXX_FLAGS="-std=c++17" \
+    cmake -DCMAKE_CXX_STANDARD=17 \
+          -DCMAKE_INSTALL_PREFIX=$ITK_DIR/install \
           -DBUILD_TESTING=OFF \
           -DITK_USE_FFTWD=ON \
           -DITK_USE_FFTWF=ON \
-          -DITK_USE_SYSTEM_FFTW:BOOL=ON \
+          -DITK_USE_SYSTEM_FFTW=ON \
           -DITK_MINIMUM_COMPLIANCE_LEVEL=3 \
           -DModule_RTK=ON \
           -DREMOTE_GIT_TAG_RTK=master \
           $ITK_DIR/src && \
-    make -j$(nproc) && \
+    make -j$(nproc) install && \
     rm -rf $ITK_DIR/src
+
 
 # Instalar o Torch com certificados atualizados
 RUN apt-get update && apt-get install -y ca-certificates && \
@@ -121,12 +123,13 @@ WORKDIR /root/build
 RUN cmake -DGATE_USE_TORCH=ON \
           -DTorch_DIR=$TORCH_DIR/libtorch/share/cmake/Torch \
           -DGATE_USE_RTK=ON \
-          -DITK_DIR=$ITK_DIR/build \
+          -DITK_DIR=$ITK_DIR/install \
           -DGATE_COMPILE_GATEDIGIT=ON \
           -DGATE_USE_OPTICAL=ON \
           -DBUILD_TESTING=ON \
           /root/software/gate/src && \
     make -j$(nproc)
+
 
 # Definir o comando padrão
 CMD ["bash"]
