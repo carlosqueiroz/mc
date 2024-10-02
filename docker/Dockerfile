@@ -111,6 +111,7 @@ RUN echo "source $ROOTSYS/bin/thisroot.sh" >> /root/.bashrc
 RUN echo "source $GEANT4_DIR/install/bin/geant4.sh" >> /root/.bashrc
 
 # Clonar o repositório do Gate
+
 RUN git clone https://github.com/OpenGATE/Gate.git /root/software/gate/src && \
     cd /root/software/gate/src && \
     git checkout ${GATE_VERSION}
