@@ -118,6 +118,9 @@ RUN git clone https://github.com/OpenGATE/Gate.git /root/software/gate/src && \
     cd /root/software/gate/src && \
     git checkout ${GATE_VERSION}
 
+# Modificar o arquivo para comentar a linha fclose
+RUN sed -i '735s/^/\/\//' /root/software/gate/src/source/digits_hits/src/GatePhaseSpaceActor.cc
+
 # Construir o Gate
 WORKDIR /root/build
 RUN cmake -DGATE_USE_TORCH=ON \
