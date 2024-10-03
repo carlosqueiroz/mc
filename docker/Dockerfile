@@ -89,8 +89,8 @@ RUN mkdir -p $ITK_DIR/src $ITK_DIR/build && \
           -DREMOTE_GIT_TAG_RTK=master \
           $ITK_DIR/src && \
     make -j$(nproc) install && \
+    find $ITK_DIR/install -name ITKConfig.cmake && \
     rm -rf $ITK_DIR/src
-
 
 # Instalar o Torch com certificados atualizados
 RUN apt-get update && apt-get install -y ca-certificates && \
@@ -105,15 +105,15 @@ ENV ROOTSYS=$ROOT_DIR/install
 ENV PATH=$ROOTSYS/bin:$PATH
 ENV LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
 
-# Atualizar CMAKE_PREFIX_PATH para incluir o diretório de instalação do Geant4
-ENV CMAKE_PREFIX_PATH=$GEANT4_DIR/install:$CMAKE_PREFIX_PATH
+# Atualizar CMAKE_PREFIX_PATH para incluir o diretório de instalação do Geant4 e ITK
+ENV CMAKE_PREFIX_PATH=$GEANT4_DIR/install:$ITK_DIR/install/lib/cmake/ITK-5.3:$CMAKE_PREFIX_PATH
+ENV LD_LIBRARY_PATH=$ITK_DIR/install/lib:$LD_LIBRARY_PATH
 
 # Fonte dos scripts de ambiente do ROOT e Geant4
 RUN echo "source $ROOTSYS/bin/thisroot.sh" >> /root/.bashrc
 RUN echo "source $GEANT4_DIR/install/bin/geant4.sh" >> /root/.bashrc
 
 # Clonar o repositório do Gate
-
 RUN git clone https://github.com/OpenGATE/Gate.git /root/software/gate/src && \
     cd /root/software/gate/src && \
     git checkout ${GATE_VERSION}
@@ -123,13 +123,12 @@ WORKDIR /root/build
 RUN cmake -DGATE_USE_TORCH=ON \
           -DTorch_DIR=$TORCH_DIR/libtorch/share/cmake/Torch \
           -DGATE_USE_RTK=ON \
-          -DITK_DIR=$ITK_DIR/install \
+          -DITK_DIR=$ITK_DIR/install/lib/cmake/ITK-5.3 \
           -DGATE_COMPILE_GATEDIGIT=ON \
           -DGATE_USE_OPTICAL=ON \
           -DBUILD_TESTING=ON \
           /root/software/gate/src && \
     make -j$(nproc)
-
 
 # Definir o comando padrão
 CMD ["bash"]
