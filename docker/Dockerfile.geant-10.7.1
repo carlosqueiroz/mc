@@ -1,0 +1,96 @@
+# Usar a imagem oficial do Ubuntu
+FROM ubuntu:24.04
+
+# Definir variáveis de ambiente necessárias
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ROOT_VERSION=v6-19-02
+ENV CLHEP_VERSION=2.4.4.1
+ENV GEANT4_VERSION=v10.7.1
+ENV ITK_VERSION=v4.13.3
+ENV TORCH_VERSION=1.7.0
+ARG GATE_VERSION=v9.1
+ENV ROOT_DIR=/root/software/root
+ENV GEANT4_DIR=/root/software/geant4
+ENV ITK_DIR=/root/software/itk
+ENV TORCH_DIR=/root/software/libtorch
+ENV CLHEP_DIR=/root/software/clhep
+
+# Atualizar pacotes e instalar dependências gerais
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    make \
+    binutils \
+    libx11-dev \
+    libtbb-dev \
+    libxpm-dev \
+    libxft-dev \
+    libxext-dev \
+    qtbase5-dev \
+    qt5-qmake \
+    git \
+    cmake \
+    libssl-dev \
+    python3.8-dev \
+    python3-pip \
+    ccache \
+    fftw3-dev \
+    wget \
+    unzip \
+    curl \
+    libxml2-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Desabilitar verificação SSL do git (se necessário)
+RUN git config --global http.sslVerify false
+RUN pip3 install uproot==3.12.0 click==7.1.2 SimpleITK==2.0.1 numpy pandas matplotlib scipy pydicom stl mesh numpy-stl panda gaga-phsp scikit-learn
+
+# Criar diretórios para instalação
+WORKDIR /root
+RUN mkdir -p $ROOT_DIR $CLHEP_DIR $GEANT4_DIR $ITK_DIR $TORCH_DIR /root/software/option_dependencies
+
+# Instalar o ROOT
+RUN git clone --branch $ROOT_VERSION https://github.com/root-project/root.git --depth 1 $ROOT_DIR/src && \
+    mkdir -p $ROOT_DIR/build && \
+    cd $ROOT_DIR/build && \
+    cmake $ROOT_DIR/src \
+          -DCMAKE_CXX_STANDARD=17 \
+          -Dpython=OFF \
+          -Dpyroot=OFF \
+          -Dclad=OFF \
+          -Dxrootd=OFF \
+          -DCMAKE_INSTALL_PREFIX=$ROOT_DIR/install && \
+    make -j$(nproc) install && \
+    rm -rf $ROOT_DIR/src $ROOT_DIR/build
+
+# Instalar o CLHEP
+RUN git clone --branch $ROOT_VERSION https://github.com/root-project/root.git --depth 1 $ROOT_DIR/src && \
+    mkdir -p $ROOT_DIR/build && \
+    cd $ROOT_DIR/build && \
+    cmake $ROOT_DIR/src \
+          -DCMAKE_CXX_STANDARD=17 \
+          -Dpython=OFF \
+          -Dpyroot=OFF \
+          -Dclad=OFF \
+          -Dxrootd=OFF \
+          -DCMAKE_INSTALL_PREFIX=$ROOT_DIR/install && \
+    make -j$(nproc) install && \
+    rm -rf $ROOT_DIR/src $ROOT_DIR/build
+
+
+# Instalar o Geant4
+RUN git clone --branch $GEANT4_VERSION https://github.com/Geant4/geant4.git --depth 1 $GEANT4_DIR/src && \
+    mkdir -p $GEANT4_DIR/build $GEANT4_DIR/data && \
+    cd $GEANT4_DIR/build && \
+    cmake -DGEANT4_INSTALL_DATA=ON \
+          -DGEANT4_BUILD_MULTITHREADED=OFF \
+          -DGEANT4_INSTALL_DATADIR=$GEANT4_DIR/data \
+          -DCMAKE_INSTALL_PREFIX=$GEANT4_DIR/install \
+          $GEANT4_DIR/src && \
+    make -j$(nproc) install && \
+    rm -rf $GEANT4_DIR/src $GEANT4_DIR/build
+
+# Definir o comando padrão
+CMD ["bash"]
