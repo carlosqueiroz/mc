@@ -1,0 +1,29 @@
+name: Docker Image CI/CD
+
+on:
+  push:
+    branches:
+      - main  # Substitua por 'master' ou outra branch se necessário
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+
+      - name: Logar no DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Construir e enviar a imagem Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: ./docker
+          file: ./docker/Dockerfile.geant-10.7.1
+          push: true
+          tags: rtmedical/mc:geant-10.7.1
