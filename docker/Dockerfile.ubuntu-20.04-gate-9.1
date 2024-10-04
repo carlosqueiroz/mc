@@ -12,6 +12,7 @@ ENV ROOT_DIR=/root/software/root
 ENV GEANT4_DIR=/root/software/geant4
 ENV ITK_DIR=/root/software/itk
 ENV TORCH_DIR=/root/software/libtorch
+ENV CLHEP_VERSION=2.4.4.0  # Defina a versão do CLHEP
 
 # Atualizar pacotes e instalar dependências gerais
 RUN apt-get update -qq && \
@@ -100,18 +101,18 @@ RUN apt-get update && apt-get install -y ca-certificates && \
     unzip libtorch-cxx11-abi-shared-with-deps-$TORCH_VERSION+cpu.zip -d $TORCH_DIR && \
     rm libtorch-cxx11-abi-shared-with-deps-$TORCH_VERSION+cpu.zip
 
-# Definir variáveis de ambiente para ROOT e Geant4
-ENV ROOTSYS=$ROOT_DIR/install
-ENV PATH=$ROOTSYS/bin:$PATH
-ENV LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
+# Instalar CLHEP
+RUN mkdir -p /root/software/clhep && \
+    cd /root/software/clhep && \
+    wget https://proj-clhep.web.cern.ch/proj-clhep/dist1/clhep-$CLHEP_VERSION.tgz && \
+    tar -zxf clhep-$CLHEP_VERSION.tgz && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/root/software/clhep/install ../clhep-$CLHEP_VERSION && \
+    make -j$(nproc) && make install
 
-# Atualizar CMAKE_PREFIX_PATH para incluir o diretório de instalação do Geant4 e ITK
-ENV CMAKE_PREFIX_PATH=$GEANT4_DIR/install:$ITK_DIR/install/lib/cmake/ITK4.13.3-5.3:$CMAKE_PREFIX_PATH
-ENV LD_LIBRARY_PATH=$ITK_DIR/install/lib:$LD_LIBRARY_PATH
-
-# Fonte dos scripts de ambiente do ROOT e Geant4
-RUN echo "source $ROOTSYS/bin/thisroot.sh" >> /root/.bashrc
-RUN echo "source $GEANT4_DIR/install/bin/geant4.sh" >> /root/.bashrc
+# Atualizar CMAKE_PREFIX_PATH para incluir o diretório de instalação do Geant4, ITK e CLHEP
+ENV CMAKE_PREFIX_PATH=$GEANT4_DIR/install:$ITK_DIR/install:$CLHEP_DIR/install:$CMAKE_PREFIX_PATH
+ENV LD_LIBRARY_PATH=$ITK_DIR/install/lib:/root/software/clhep/install/lib:$LD_LIBRARY_PATH
 
 # Clonar o repositório do Gate
 RUN git clone https://github.com/OpenGATE/Gate.git /root/software/gate/src && \
@@ -126,9 +127,10 @@ WORKDIR /root/build
 RUN cmake -DGATE_USE_TORCH=ON \
           -DTorch_DIR=$TORCH_DIR/libtorch/share/cmake/Torch \
           -DGATE_USE_RTK=ON \
-          -DITK_DIR=$ITK_DIR/install/lib/cmake/ITK-5.3 \
+          -DITK_DIR=$ITK_DIR/install/lib/cmake/ITK-4.13 \
           -DGATE_COMPILE_GATEDIGIT=ON \
           -DGATE_USE_OPTICAL=ON \
+          -DCLHEP_ROOT_DIR=/root/software/clhep/install \
           -DBUILD_TESTING=ON \
           /root/software/gate/src && \
     make -j$(nproc)
