@@ -1,4 +1,4 @@
-# Usar a imagem oficial do Ubuntu
+# Usar a imagem oficial do Ubuntu 20.04
 FROM ubuntu:20.04
 
 # Definir variáveis de ambiente necessárias
@@ -9,6 +9,7 @@ ENV GEANT4_VERSION=v10.7.1
 ENV ITK_VERSION=v4.13.3
 ENV TORCH_VERSION=1.7.0
 ARG GATE_VERSION=v9.1
+
 ENV ROOT_DIR=/root/software/root
 ENV GEANT4_DIR=/root/software/geant4
 ENV ITK_DIR=/root/software/itk
@@ -39,13 +40,14 @@ RUN apt-get update -qq && \
     wget \
     unzip \
     curl \
-    libxml2-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    libxml2-dev \
+    nano \
+    mesa-utils \
+    libglu1-mesa-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Desabilitar verificação SSL do git (se necessário)
-RUN git config --global http.sslVerify false
-RUN pip3 install uproot==3.12.0 click==7.1.2 SimpleITK==2.0.1 numpy pandas matplotlib scipy pydicom stl mesh numpy-stl panda gaga-phsp scikit-learn
+# Instalar pacotes Python e dependências adicionais
+RUN pip3 install uproot==3.12.0 click==7.1.2 SimpleITK==2.0.1 numpy pandas matplotlib scipy pydicom stl numpy-stl scikit-learn
 
 # Criar diretórios para instalação
 WORKDIR /root
@@ -53,8 +55,7 @@ RUN mkdir -p $ROOT_DIR $CLHEP_DIR $GEANT4_DIR $ITK_DIR $TORCH_DIR /root/software
 
 # Instalar o CLHEP
 RUN wget -q https://proj-clhep.web.cern.ch/proj-clhep/dist1/clhep-$CLHEP_VERSION.tgz && \
-    tar -zxf clhep-$CLHEP_VERSION.tgz -C $CLHEP_DIR/src --strip-components=2 && \
-    ls -l $CLHEP_DIR/src && \
+    tar -zxf clhep-$CLHEP_VERSION.tgz -C $CLHEP_DIR/src --strip-components=1 && \
     mkdir -p $CLHEP_DIR/build && \
     cd $CLHEP_DIR/build && \
     cmake $CLHEP_DIR/src \
@@ -77,7 +78,6 @@ RUN git clone --branch $ROOT_VERSION https://github.com/root-project/root.git --
     make -j$(nproc) install && \
     rm -rf $ROOT_DIR/src $ROOT_DIR/build
 
-
 # Instalar o Geant4
 RUN git clone --branch $GEANT4_VERSION https://github.com/Geant4/geant4.git --depth 1 $GEANT4_DIR/src && \
     mkdir -p $GEANT4_DIR/build $GEANT4_DIR/data && \
@@ -86,11 +86,16 @@ RUN git clone --branch $GEANT4_VERSION https://github.com/Geant4/geant4.git --de
           -DGEANT4_BUILD_MULTITHREADED=OFF \
           -DGEANT4_INSTALL_DATADIR=$GEANT4_DIR/data \
           -DCMAKE_INSTALL_PREFIX=$GEANT4_DIR/install \
+          -DGEANT4_USE_QT=ON \
+          -DGEANT4_USE_OPENGL_X11=ON \
           -DGEANT4_USE_SYSTEM_CLHEP=ON \
           -DCLHEP_ROOT_DIR=$CLHEP_DIR/install \
           $GEANT4_DIR/src && \
     make -j$(nproc) install && \
     rm -rf $GEANT4_DIR/src $GEANT4_DIR/build
+
+# Configurações finais
+RUN echo "export PATH=$ROOT_DIR/install/bin:$GEANT4_DIR/install/bin:$CLHEP_DIR/install/bin:\$PATH" >> /root/.bashrc
 
 # Definir o comando padrão
 CMD ["bash"]
