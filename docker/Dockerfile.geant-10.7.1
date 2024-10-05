@@ -4,7 +4,7 @@ FROM ubuntu:20.04
 # Definir variáveis de ambiente necessárias
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ROOT_VERSION=v6-19-02
-ENV CLHEP_VERSION=2.4.4.1
+ENV CLHEP_VERSION=2.4.4.0
 ENV GEANT4_VERSION=v10.7.1
 ENV ITK_VERSION=v4.13.3
 ENV TORCH_VERSION=1.7.0
@@ -55,13 +55,13 @@ RUN mkdir -p $ROOT_DIR $CLHEP_DIR $GEANT4_DIR $ITK_DIR $TORCH_DIR /root/software
 
 # Instalar o CLHEP
 RUN wget -q https://proj-clhep.web.cern.ch/proj-clhep/dist1/clhep-$CLHEP_VERSION.tgz && \
-    tar -zxf clhep-$CLHEP_VERSION.tgz -C $CLHEP_DIR/src --strip-components=1 && \
+    tar -zxf clhep-$CLHEP_VERSION.tgz -C $CLHEP_DIR/src --strip-components=2 && \
     mkdir -p $CLHEP_DIR/build && \
     cd $CLHEP_DIR/build && \
     cmake $CLHEP_DIR/src \
           -DCMAKE_CXX_STANDARD=17 \
           -DCMAKE_INSTALL_PREFIX=$CLHEP_DIR/install && \
-    make -j$(nproc) install && \
+    make -j$(nproc) && make install && \
     rm -rf $CLHEP_DIR/src $CLHEP_DIR/build
 
 # Instalar o ROOT
@@ -97,5 +97,5 @@ RUN git clone --branch $GEANT4_VERSION https://github.com/Geant4/geant4.git --de
 # Configurações finais
 RUN echo "export PATH=$ROOT_DIR/install/bin:$GEANT4_DIR/install/bin:$CLHEP_DIR/install/bin:\$PATH" >> /root/.bashrc
 
-# Definir o comando padrão
-CMD ["bash"]
+# Definir o comando padrão (opcional)
+CMD ["/bin/bash"]
