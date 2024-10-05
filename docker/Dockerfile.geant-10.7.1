@@ -54,6 +54,7 @@ RUN mkdir -p $ROOT_DIR $CLHEP_DIR $GEANT4_DIR $ITK_DIR $TORCH_DIR /root/software
 # Instalar o CLHEP
 RUN wget -q https://proj-clhep.web.cern.ch/proj-clhep/dist1/clhep-$CLHEP_VERSION.tgz && \
     tar -zxf clhep-$CLHEP_VERSION.tgz -C $CLHEP_DIR/src --strip-components=2 && \
+    ls -l $CLHEP_DIR/src && \
     mkdir -p $CLHEP_DIR/build && \
     cd $CLHEP_DIR/build && \
     cmake $CLHEP_DIR/src \
@@ -61,7 +62,6 @@ RUN wget -q https://proj-clhep.web.cern.ch/proj-clhep/dist1/clhep-$CLHEP_VERSION
           -DCMAKE_INSTALL_PREFIX=$CLHEP_DIR/install && \
     make -j$(nproc) install && \
     rm -rf $CLHEP_DIR/src $CLHEP_DIR/build
-
 
 # Instalar o ROOT
 RUN git clone --branch $ROOT_VERSION https://github.com/root-project/root.git --depth 1 $ROOT_DIR/src && \
