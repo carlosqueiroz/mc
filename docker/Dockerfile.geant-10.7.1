@@ -53,7 +53,7 @@ RUN mkdir -p $ROOT_DIR $CLHEP_DIR $GEANT4_DIR $ITK_DIR $TORCH_DIR /root/software
 
 # Instalar o CLHEP
 RUN wget -q https://proj-clhep.web.cern.ch/proj-clhep/dist1/clhep-$CLHEP_VERSION.tgz && \
-    tar -zxf clhep-$CLHEP_VERSION.tgz -C $CLHEP_DIR/src --strip-components=1 && \
+    tar -zxf clhep-$CLHEP_VERSION.tgz -C $CLHEP_DIR/src --strip-components=2 && \
     mkdir -p $CLHEP_DIR/build && \
     cd $CLHEP_DIR/build && \
     cmake $CLHEP_DIR/src \
