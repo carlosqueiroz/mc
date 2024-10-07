@@ -16,6 +16,13 @@ ENV ITK_DIR=/root/software/itk
 ENV TORCH_DIR=/root/software/libtorch
 ENV CLHEP_DIR=/root/software/clhep
 
+RUN apt-get update && apt-get install -y \
+    qt5-default \
+    libqt5opengl5-dev \
+    libglu1-mesa-dev \
+    libgl1-mesa-dev \
+    libx11-dev
+
 # Instalar o CLHEP
 RUN git clone --branch $CLHEP_VERSION https://gitlab.cern.ch/CLHEP/CLHEP.git --depth 1 $CLHEP_DIR/src && \
     mkdir -p $CLHEP_DIR/build && \
