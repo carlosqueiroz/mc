@@ -57,13 +57,12 @@ RUN git clone --branch $GEANT4_VERSION https://github.com/Geant4/geant4.git --de
           -DGEANT4_BUILD_MULTITHREADED=OFF \
           -DGEANT4_INSTALL_DATADIR=$GEANT4_DIR/data \
           -DCMAKE_INSTALL_PREFIX=$GEANT4_DIR/install \
-          -DGEANT4_USE_QT=ON \
-          -DGEANT4_USE_OPENGL_X11=ON \
-          -DGEANT4_USE_SYSTEM_CLHEP=ON \
           -DCLHEP_ROOT_DIR=$CLHEP_DIR/install \
           $GEANT4_DIR/src && \
     make -j$(nproc) install && \
     rm -rf $GEANT4_DIR/src $GEANT4_DIR/build
+
+    
 
 # Configurações finais
 RUN echo "export PATH=$ROOT_DIR/install/bin:$GEANT4_DIR/install/bin:$CLHEP_DIR/install/bin:\$PATH" >> /root/.bashrc
