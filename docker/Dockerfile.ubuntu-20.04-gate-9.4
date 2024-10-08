@@ -117,6 +117,8 @@ RUN echo "source $GEANT4_DIR/install/bin/geant4.sh" >> /root/.bashrc
 RUN git clone https://github.com/OpenGATE/Gate.git /root/software/gate/src && \
     cd /root/software/gate/src && \
     git checkout ${GATE_VERSION}
+    
+RUN sed -i '735s/^/\/\//' /root/software/gate/src/source/digits_hits/src/GatePhaseSpaceActor.cc
 
 # Construir o Gate
 WORKDIR /root/build
