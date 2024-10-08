@@ -16,6 +16,7 @@ ENV TORCH_DIR=/root/software/libtorch
 
 # Desabilitar verificação SSL do git (se necessário)
 RUN git config --global http.sslVerify false
+RUN $ROOT_DIR/install/bin/root-config --version
 
 
 
@@ -46,11 +47,20 @@ RUN apt-get update && apt-get install -y ca-certificates && \
     unzip libtorch-cxx11-abi-shared-with-deps-$TORCH_VERSION+cpu.zip -d $TORCH_DIR && \
     rm libtorch-cxx11-abi-shared-with-deps-$TORCH_VERSION+cpu.zip
 
-# Atualizar CMAKE_PREFIX_PATH para incluir o diretório de instalação do Geant4, ITK e CLHEP
-ENV CMAKE_PREFIX_PATH=$GEANT4_DIR/install:$ITK_DIR/install:/root/software/clhep/install:$CMAKE_PREFIX_PATH
+# Atualizar CMAKE_PREFIX_PATH para incluir o diretório de instalação do ROOT
+ENV CMAKE_PREFIX_PATH=$GEANT4_DIR/install:$ITK_DIR/install/lib/cmake/ITK-5.3:/root/software/clhep/install:$ROOT_DIR/install:$CMAKE_PREFIX_PATH
 
-ENV CMAKE_PREFIX_PATH=$GEANT4_DIR/install:$ITK_DIR/install/lib/cmake/ITK-5.3:$CMAKE_PREFIX_PATH
-ENV LD_LIBRARY_PATH=$ITK_DIR/install/lib:/root/software/clhep/install/lib:$LD_LIBRARY_PATH
+# Atualizar LD_LIBRARY_PATH para incluir as bibliotecas do ROOT
+ENV LD_LIBRARY_PATH=$ITK_DIR/install/lib:/root/software/clhep/install/lib:$ROOT_DIR/install/lib:$LD_LIBRARY_PATH
+
+# Adicionar o binário do ROOT ao PATH
+ENV PATH=$ROOT_DIR/install/bin:$PATH
+
+# Definir ROOTSYS
+ENV ROOTSYS=$ROOT_DIR/install
+
+
+
 
 # Clonar o repositório do Gate
 RUN git clone https://github.com/OpenGATE/Gate.git /root/software/gate/src && \
