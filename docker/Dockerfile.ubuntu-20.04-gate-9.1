@@ -4,7 +4,8 @@ FROM rtmedical/mc:geant-10.7.1
 # Definir variáveis de ambiente necessárias
 ENV DEBIAN_FRONTEND=noninteractive
 ENV GEANT4_VERSION=v10.7.1
-ENV ITK_VERSION=v4.13.3
+#ENV ITK_VERSION=v4.13.3
+ENV ITK_VERSION=v5.3.0
 ENV TORCH_VERSION=1.7.0
 ARG GATE_VERSION=v9.1
 ENV ROOT_DIR=/root/software/root
@@ -47,6 +48,8 @@ RUN apt-get update && apt-get install -y ca-certificates && \
 
 # Atualizar CMAKE_PREFIX_PATH para incluir o diretório de instalação do Geant4, ITK e CLHEP
 ENV CMAKE_PREFIX_PATH=$GEANT4_DIR/install:$ITK_DIR/install:/root/software/clhep/install:$CMAKE_PREFIX_PATH
+
+ENV CMAKE_PREFIX_PATH=$GEANT4_DIR/install:$ITK_DIR/install/lib/cmake/ITK-5.3:$CMAKE_PREFIX_PATH
 ENV LD_LIBRARY_PATH=$ITK_DIR/install/lib:/root/software/clhep/install/lib:$LD_LIBRARY_PATH
 
 # Clonar o repositório do Gate
@@ -56,19 +59,21 @@ RUN git clone https://github.com/OpenGATE/Gate.git /root/software/gate/src && \
 
 # Modificar o arquivo para comentar a linha fclose
 RUN sed -i '735s/^/\/\//' /root/software/gate/src/source/digits_hits/src/GatePhaseSpaceActor.cc
-
+   
 # Construir o Gate
 WORKDIR /root/build
 RUN cmake -DGATE_USE_TORCH=ON \
           -DTorch_DIR=$TORCH_DIR/libtorch/share/cmake/Torch \
           -DGATE_USE_RTK=ON \
-          -DITK_DIR=$ITK_DIR/install/lib/cmake/ITK-4.13 \
+          -DITK_DIR=$ITK_DIR/install/lib/cmake/ITK-5.3 \
           -DGATE_COMPILE_GATEDIGIT=ON \
           -DGATE_USE_OPTICAL=ON \
           -DCLHEP_ROOT_DIR=/root/software/clhep/install \
           -DBUILD_TESTING=ON \
           /root/software/gate/src && \
     make -j$(nproc)
+
+
 
 # Definir o comando padrão
 CMD ["bash"]
