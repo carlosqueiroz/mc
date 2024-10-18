@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main  # Substitua por 'master' ou outra branch se necessário
+    paths:
+      - docker/Dockerfile.ubuntu-20.04
   workflow_dispatch:
 
 jobs:
