@@ -100,7 +100,7 @@ RUN git clone --branch $GEANT4_VERSION https://github.com/Geant4/geant4.git --de
           -DGEANT4_INSTALL_DATADIR=$GEANT4_DIR/data \
           -DCMAKE_INSTALL_PREFIX=$GEANT4_DIR/install \
           -DCLHEP_ROOT_DIR=$CLHEP_DIR/install \
-          -DGEANT4_USE_SYSTEM_CLHEP=ON \
+          -DGEANT4_USE_SYSTEM_CLHEP=OFF \
           $GEANT4_DIR/src && \
     make -j$(nproc) install && \
     rm -rf $GEANT4_DIR/src $GEANT4_DIR/build
