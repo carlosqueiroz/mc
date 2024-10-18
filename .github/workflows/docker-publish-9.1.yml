@@ -1,9 +1,11 @@
-name: Docker Image Build  Gate 9.1
+name: Docker Image Build Gate 9.1
 
 on:
   push:
     branches:
       - main  # Substitua por 'master' ou outra branch se necessário
+    paths:
+      - docker/Dockerfile.ubuntu-20.04-gate-9.1
   workflow_dispatch:
 
 jobs:
