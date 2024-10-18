@@ -46,7 +46,7 @@ RUN apt-get update -qq && \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Instalar pacotes Python e dependências adicionais
-RUN pip3 install uproot==3.12.0 click==7.1.2 SimpleITK==2.0.1 numpy pandas matplotlib scipy pydicom stl numpy-stl scikit-learn gatetools gaga-phsp
+RUN pip3 install uproot==3.12.0 click==7.1.2 SimpleITK==2.0.1 numpy pandas matplotlib scipy pydicom stl numpy-stl scikit-learn
 
 
 # Desabilitar verificação SSL do git (se necessário)
@@ -100,7 +100,7 @@ RUN git clone --branch $GEANT4_VERSION https://github.com/Geant4/geant4.git --de
           -DGEANT4_INSTALL_DATADIR=$GEANT4_DIR/data \
           -DCMAKE_INSTALL_PREFIX=$GEANT4_DIR/install \
           -DCLHEP_ROOT_DIR=$CLHEP_DIR/install \
-          -DGEANT4_USE_SYSTEM_CLHEP=OFF \
+          -DGEANT4_USE_SYSTEM_CLHEP=ON \
           $GEANT4_DIR/src && \
     make -j$(nproc) install && \
     rm -rf $GEANT4_DIR/src $GEANT4_DIR/build
