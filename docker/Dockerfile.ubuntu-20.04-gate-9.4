@@ -96,7 +96,7 @@ RUN git clone --branch $GEANT4_VERSION https://github.com/Geant4/geant4.git --de
     mkdir -p $GEANT4_DIR/build $GEANT4_DIR/data && \
     cd $GEANT4_DIR/build && \
     cmake -DGEANT4_INSTALL_DATA=ON \
-          -DGEANT4_BUILD_MULTITHREADED=OFF \
+          -DGEANT4_BUILD_MULTITHREADED=ON \
           -DGEANT4_INSTALL_DATADIR=$GEANT4_DIR/data \
           -DCMAKE_INSTALL_PREFIX=$GEANT4_DIR/install \
           -DCLHEP_ROOT_DIR=$CLHEP_DIR/install \
