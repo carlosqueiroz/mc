@@ -155,6 +155,8 @@ RUN sed -i '735s/^/\/\//' /root/software/gate/src/source/digits_hits/src/GatePha
 # Construir o Gate
 WORKDIR /root/build
 RUN cmake -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_CXX_FLAGS="-g" \
+          -DCMAKE_C_FLAGS="-g" \
           -DGATE_USE_TORCH=ON \
           -DTorch_DIR=$TORCH_DIR/libtorch/share/cmake/Torch \
           -DGATE_USE_RTK=ON \
