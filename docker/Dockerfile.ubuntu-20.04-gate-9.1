@@ -119,6 +119,8 @@ RUN mkdir -p $ITK_DIR/src $ITK_DIR/build && \
           -DITK_MINIMUM_COMPLIANCE_LEVEL=3 \
           -DModule_RTK=ON \
           -DREMOTE_GIT_TAG_RTK=master \
+          -DBUILD_SHARED_LIBS=EITHER \
+          -DModule_ITKReview=ON \
           $ITK_DIR/src && \
     make -j$(nproc) install && \
     find $ITK_DIR/install -name ITKConfig.cmake && \
